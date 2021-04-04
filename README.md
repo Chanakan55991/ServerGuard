@@ -4,7 +4,7 @@ A simple minecraft anticheat plugin made by me (Chanakan Mungtin). This project 
 
 ## Requirements
 
-The server must be running 1.16.5 because currently the code was still bound to that version. In the future release I will try to make it have a backward compatibility with other version!
+The server must be running 1.16.5 because currently the code was still bound to that version. In the future release I will try to make it have a backward compatibility with other version! And it also require you to have ProtocolLib installed on the server
 
 ## Contributing
 
