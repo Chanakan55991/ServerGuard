@@ -1,7 +1,8 @@
-name: Anticheat-Framework
-main: me.braydon.anticheat.Anticheat
+name: ServerGuard
+api-version: 1.16
+main: live.chanakancloud.serverguard.Anticheat
 version: 1.0
-author: Braydon (Rainnny)
+author: Chanakan Mungtin
 commands:
   anticheat:
     aliases: [ac]

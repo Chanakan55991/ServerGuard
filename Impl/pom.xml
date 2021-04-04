@@ -3,8 +3,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>Anticheat-Framework</artifactId>
-        <groupId>me.braydon</groupId>
+        <artifactId>serverguard</artifactId>
+        <groupId>live.chanakancloud</groupId>
         <version>1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -18,7 +18,7 @@
 
     <build>
         <!-- Changing the built jar properties -->
-        <finalName>Anticheat-Framework</finalName>
+        <finalName>ServerGuard</finalName>
         <plugins>
             <!-- Compile the output jar into the specified path in the project -->
             <plugin>
@@ -37,11 +37,15 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+        <repository>
+   			<id>dmulloy2-repo</id>
+        	<url>https://repo.dmulloy2.net/repository/public/</url>
+		</repository>
     </repositories>
 
     <dependencies>
         <dependency>
-            <groupId>me.braydon</groupId>
+            <groupId>live.chanakancloud</groupId>
             <artifactId>API</artifactId>
             <version>1.0</version>
             <scope>compile</scope>
@@ -51,6 +55,11 @@
             <artifactId>packetevents</artifactId>
             <version>v1.8-pre-9</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+        	<groupId>com.comphenix.protocol</groupId>
+    <artifactId>ProtocolLib</artifactId>
+    <version>4.6.0</version>
         </dependency>
     </dependencies>
 </project>

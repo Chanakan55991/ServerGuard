@@ -1,0 +1,70 @@
+package live.chanakancloud.serverguard.processor.impl;
+
+import io.github.retrooper.packetevents.event.eventtypes.CancellableNMSPacketEvent;
+import io.github.retrooper.packetevents.event.impl.PacketPlayReceiveEvent;
+import io.github.retrooper.packetevents.event.impl.PacketPlaySendEvent;
+import io.github.retrooper.packetevents.packettype.PacketType;
+import io.github.retrooper.packetevents.packetwrappers.NMSPacket;
+import live.chanakancloud.serverguard.Anticheat;
+import live.chanakancloud.serverguard.check.Check;
+import live.chanakancloud.serverguard.player.PlayerData;
+import live.chanakancloud.serverguard.processor.Processor;
+import lombok.NonNull;
+
+import org.bukkit.entity.Player;
+
+/**
+ * This processor processes data from packets.
+ *
+ * @author Braydon
+ */
+public class PacketProcessor extends Processor {
+    public int ping;
+    public long lastFlying;
+
+    public PacketProcessor(@NonNull PlayerData playerData) {
+        super(playerData);
+    }
+
+    @Override
+    public void onPacketPlayReceive(PacketPlayReceiveEvent event) {
+        Player player = event.getPlayer();
+        if (!player.getUniqueId().equals(playerData.getBukkitPlayer().getUniqueId()))
+            return;
+        // Processing data from the received packet
+        switch (event.getPacketId()) {
+            case PacketType.Play.Client.KEEP_ALIVE: {
+                ping = Anticheat.INSTANCE.getPacketEvents().getPlayerUtils().getPing(player);
+                break;
+            }
+            case PacketType.Play.Client.FLYING: {
+                lastFlying = System.currentTimeMillis();
+                break;
+            }
+        }
+        // Handling the received packet for all of the checks
+        handleChecks(event);
+    }
+
+    @Override
+    public void onPacketPlaySend(PacketPlaySendEvent event) {
+        if (!event.getPlayer().getUniqueId().equals(playerData.getBukkitPlayer().getUniqueId()))
+            return;
+        // Handling the sent packet for all of the checks
+        handleChecks(event);
+    }
+
+    /**
+     * Handle the checks for the given packet event
+     *
+     * @param nmsPacketEvent the packet event
+     * @see Check
+     * @see CancellableNMSPacketEvent
+     */
+    private void handleChecks(@NonNull CancellableNMSPacketEvent nmsPacketEvent) {
+        NMSPacket nmsPacket = nmsPacketEvent.getNMSPacket();
+        long timestamp = System.currentTimeMillis();
+        playerData.getChecks().parallelStream().forEach(check ->
+                check.handle(nmsPacketEvent.getPacketId(), nmsPacket, nmsPacket.getRawNMSPacket(), timestamp));
+    }
+}
