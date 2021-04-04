@@ -12,7 +12,9 @@ This project use maven, to build with maven:
 ```
 mvn clean install
 ```
+Found an issue or bugs? please open an issue and explain the steps to reproduce the bug, and give the stacktrace (if any)
 
+Want to contribute with changes? Please open a pull request and show what you have changes in the code.
 ## Features
 
 Currently ServerGuard only have simple Fly checks, this is because I just started the project and so there are not many checks available yet. There will be a lot more in the future release!
