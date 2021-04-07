@@ -1,6 +1,7 @@
 package live.chanakancloud.serverguard.check;
 
 import org.bukkit.event.Event;
+import live.chanakancloud.serverguard.Anticheat;
 
 import io.github.retrooper.packetevents.packettype.PacketType;
 import io.github.retrooper.packetevents.packetwrappers.NMSPacket;
@@ -34,6 +35,7 @@ import org.bukkit.entity.Player;
 public class Check {
     protected final PlayerData playerData;
     protected final Player player;
+    protected double vl;
     private final CheckInfo checkInfo;
 
     @Getter(AccessLevel.NONE) private int violations;
@@ -109,7 +111,7 @@ public class Check {
         playerData.addViolation(violation);
 
         PlayerCheatEvent playerCheatEvent = new PlayerCheatEvent(player, violation);
-        Bukkit.getPluginManager().callEvent(playerCheatEvent);
+        Bukkit.getScheduler().runTask(Anticheat.INSTANCE, () -> Bukkit.getPluginManager().callEvent(playerCheatEvent));
         if (playerCheatEvent.isCancelled())
             return;
 

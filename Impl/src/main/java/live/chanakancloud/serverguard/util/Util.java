@@ -1,7 +1,7 @@
 package live.chanakancloud.serverguard.util;
 
 import org.bukkit.entity.Player;
-import org.bukkit.Bukkit;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -12,8 +12,12 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
+import live.chanakancloud.serverguard.common.MovementData;
+
 public final class Util {
 	
+	
+	private static boolean underBlock;
 	private static final List<Material> CLIMBABLE = new ArrayList<Material>();
 	private static final List<Material> INSTANT_BREAK = new ArrayList<Material>();
 	private static final List<Material> FOOD = new ArrayList<Material>();
@@ -37,7 +41,14 @@ public final class Util {
 		Material type = block.getType();
 		return type.name().endsWith("BED");
 	}
-
+	
+	/*
+	 * public static boolean isUnderBlock(Player player) {
+	 * if(player.getLocation().add(0, 2, 0).getBlock().getType() != Material.AIR) {
+	 * underBlock = true; return true; } underBlock = false; return false; }
+	 * 
+	 * public static boolean isWasUnderBlock() { return underBlock; }
+	 */
 	
 	public static boolean isNearBed(Location location) {
 		return isBed(location.getBlock()) || isBed(location.getBlock().getRelative(BlockFace.NORTH))
@@ -77,6 +88,18 @@ public final class Util {
 		return type.name().endsWith("STAIRS");
 	}
 	
+	public static boolean isNearGround(Location location) {
+		double expand = 0.3;
+		for (double x = -expand; x <= expand; x += expand) {
+			for (double z = -expand; z <= expand; z += expand) {
+				if (location.clone().add(x, -0.5001, z).getBlock().getType() != Material.AIR) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	public static boolean isWall(Block block) {
 		Material type = block.getType();
 		return type.name().endsWith("WALL") || type.name().endsWith("FENCE");
@@ -87,6 +110,10 @@ public final class Util {
 		return type.name().endsWith("SLAB");
 	}
 	
+	public static boolean isTeleporting(MovementData data) {
+		return Math.abs(data.to.getY() - data.from.getY()) >= 400;
+	}
+		
 	public static boolean isNearClimbable(Player player) {
 		return isClimbableBlock(player.getLocation().getBlock())
 				|| isClimbableBlock(player.getLocation().getBlock().getRelative(BlockFace.DOWN))
@@ -123,6 +150,11 @@ public final class Util {
 	public static boolean isClimbableBlock(Block block) {
 		return CLIMBABLE.contains(block.getType());
 	}
+	
+	public static boolean isUnderBlock(Player player) {
+		return player.getLocation().add(0, 2, 0).getBlock().getType() != Material.AIR;
+	}
+	
 	
 	static {
 		// Start 1.8.8

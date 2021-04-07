@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import live.chanakancloud.serverguard.check.impl.fly.FlyA;
+import live.chanakancloud.serverguard.check.impl.fly.FlyB;
 import live.chanakancloud.serverguard.check.impl.speed.SpeedA;
 
 /**
@@ -20,7 +21,11 @@ public class CheckManager {
             SpeedA.class,
 
             // Fly
-            FlyA.class
+            FlyA.class,
+            
+            FlyB.class
+            
+            
     ));
 
     /**

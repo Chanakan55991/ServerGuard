@@ -16,102 +16,58 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
+import com.google.protobuf.Timestamp;
+
 import live.chanakancloud.serverguard.common.MovementData;
 import live.chanakancloud.serverguard.player.PlayerData;
 import live.chanakancloud.serverguard.util.Util;
 
-@CheckInfo(name = "Fly (A)", type = CheckType.FLY, experimental = true)
+@CheckInfo(name = "Fly (A)", type = CheckType.FLY, experimental = false)
 public class FlyA extends Check {
 	public FlyA(@NonNull PlayerData playerData) throws ClassNotFoundException {
 		super(playerData);
 	}
-	
-	private boolean lastOnGround, lastLastOnGround;
-	private double lastDeltaY;
-	private boolean isJumping;
-	private int nearLiquidTicks;
-	public boolean halfMovement;
-	public int halfMovementHistoryCounter = 0;
-	
+    private static final double TOLERANCE = 0.005;
 
-	@Override
-	public void handle(MovementData movementData, long timestamp) {
-		Vector velocity = playerData.getBukkitPlayer().getVelocity();
-		double jumpVelocity = (double) 0.42F;
-		this.isJumping = false;
-		this.halfMovement = false;
-		
-		if (velocity.getY() > 0) {
-			PotionEffect jumpPotion = player.getPotionEffect(PotionEffectType.JUMP);
-			if (jumpPotion != null) {
-				jumpVelocity += (double) ((float) jumpPotion.getAmplifier() + 1) * 0.1F;
-			}
-			if (player.getLocation().getBlock().getType() != Material.LADDER && Double.compare(velocity.getY(), jumpVelocity) == 0) {
-				this.isJumping = true;
-			}
-		}
-		
-		if (Util.couldBeOnHalfblock(movementData.to) || Util.isNearBed(movementData.to)) {
-			this.halfMovement = true;
-			this.halfMovementHistoryCounter = 30;
-		} else {
-			if (this.halfMovementHistoryCounter > 0)
-				this.halfMovementHistoryCounter--;
-		}
-		double deltaY = movementData.to.getY() - movementData.from.getY();
+    private Double lastOffsetY;
+    @Override
+    public void handle(MovementData data, long timestamp) { 
+    	
+        if (player.getVelocity().getY() > 5 || Util.isTeleporting(data) || Util.isNearClimbable(player)) {
+            lastOffsetY = null;
+            return;
+        }
 
-		double lastDeltaY = this.lastDeltaY;
+        double offsetY = data.to.getY() - data.from.getY(); 
 
-		this.lastDeltaY = deltaY;
+        if (!Util.isNearGround(data.from) && !Util.isNearGround(data.to)) { 
+            if (lastOffsetY != null && !Util.isNearWater(player)) {
+                double expectedOffsetY = (lastOffsetY - 0.08D) * 0.9800000190734863D;
 
-		boolean onGround = isNearGround(movementData.to);
+                // We're going to ignore them if they're in an unloaded chunk
+                if (offsetY + 0.09800000190734881 <= 0.001) {
+                    lastOffsetY = null;
+                    return;
+                }
 
-		boolean lastOnGround = this.lastOnGround;
-		this.lastOnGround = onGround;
+                double difference = Math.abs(expectedOffsetY - offsetY);
 
-		boolean lastLastOnGround = this.lastLastOnGround;
-		this.lastLastOnGround = lastOnGround;
+                // Since we don't have any direct calculation for vertical collision we'll just make it a bit more lenient
+                int limit = Util.isUnderBlock(player) ? 3 : 1;
 
-		double predictedDelta = (lastDeltaY - 0.08D) * 0.9800000190734863D;
-		debug(Double.toString(Double.compare(velocity.getY(), jumpVelocity)));
-		//debug(Double.toString(deltaY) + " " + Double.toString(predictedDelta));
-		if (!(this.isJumping || movementData.from.getBlockY() < movementData.to.getBlockY() || Math.abs(movementData.to.getY() - movementData.from.getY()) >= 400 || VersionUtil.isFlying(playerData.getBukkitPlayer()) || VersionUtil.isRiptiding(playerData.getBukkitPlayer()) || VersionUtil.isSwimming(playerData.getBukkitPlayer()) || VersionUtil.isLevitationEffect(playerData.getPotionEffect(PotionEffectType.LEVITATION)) || playerData.getBukkitPlayer().getVehicle() != null || this.halfMovement || Util.isNearClimbable(playerData.getBukkitPlayer()))) {
-			if (nearLiquidTicks <= 0) {
-				if (!onGround && !lastOnGround && !lastLastOnGround && Math.abs(predictedDelta) >= 0.005D) {
-					if (!isRoughlyEqual(deltaY, predictedDelta)) {
-						flag("DeltaY: " + deltaY + " Predicted Delta: " +  predictedDelta);
-					}
-				}
-			}
-		}
-	}
-	//        if (deltaY >= maxDeltaY)
-	//            flag(deltaY + ">=" + maxDeltaY);
+                if (difference > TOLERANCE) {
+                    if (++vl > limit) {
+                        flag(String.format("%s -> %s", offsetY, expectedOffsetY));
+                    }
+                } else {
+                    vl = vl - 0.45;
+                }
+            }
 
-	public boolean isRoughlyEqual(double d1, double d2) {
-		return Math.abs(d1 - d2) < 0.001;
-	}
-	public boolean isNearGround(Location location) {
-		double expand = 0.3;
-		for (double x = -expand; x <= expand; x += expand) {
-			for (double z = -expand; z <= expand; z += expand) {
-				if (location.clone().add(x, -0.5001, z).getBlock().getType() != Material.AIR) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	public void nearLiquidTick(Player player, Location from, Location to) {
-		if (Util.isNearWater(player))
-			this.nearLiquidTicks = 8;
-		else {
-			if (this.nearLiquidTicks > 0)
-				this.nearLiquidTicks--;
-			else
-				this.nearLiquidTicks = 0;
-		}
-	}
+            lastOffsetY = offsetY;
+        } else {
+            lastOffsetY = null;
+        }
+    }
 }
 
