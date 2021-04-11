@@ -30,8 +30,8 @@ public class FlyB extends Check {
 	public void handle(MovementData movementData, long timestamp) {
 		
 		
-		if (Util.isTeleporting(movementData) || Util.isNearGround(movementData.from)
-				|| Util.isNearGround(movementData.to) || Util.isNearClimbable(player) || Util.isNearWater(player)) {
+		if (Util.isTeleporting(movementData)|| Util.isNearGround(movementData.from)
+				|| Util.isNearGround(movementData.to) || Util.isNearClimbable(player) /*|| Util.isNearWater(player)*/) {
 			lastGroundY = movementData.to.getY();
 			return;
 		}

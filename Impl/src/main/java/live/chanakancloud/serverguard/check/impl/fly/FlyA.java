@@ -22,7 +22,7 @@ import live.chanakancloud.serverguard.common.MovementData;
 import live.chanakancloud.serverguard.player.PlayerData;
 import live.chanakancloud.serverguard.util.Util;
 
-@CheckInfo(name = "Fly (A)", type = CheckType.FLY, experimental = false)
+@CheckInfo(name = "Fly (A)", type = CheckType.FLY, experimental = true)
 public class FlyA extends Check {
 	public FlyA(@NonNull PlayerData playerData) throws ClassNotFoundException {
 		super(playerData);
