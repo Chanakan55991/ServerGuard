@@ -36,7 +36,7 @@ public class Check {
     protected final Player player;
     private final CheckInfo checkInfo;
 
-    @Getter(AccessLevel.NONE) private int violations;
+    @Getter(AccessLevel.PROTECTED) protected int violations;
 
     public Check(@NonNull PlayerData playerData) throws ClassNotFoundException {
         this.playerData = playerData;
@@ -94,6 +94,10 @@ public class Check {
      *
      * @param data the optional data to include in the flag
      */
+
+    protected final void decreaseVL(double vlMinus) {
+        violations = violations - vlMinus;
+    }
     protected final void flag(String... data) {
         violations++;
 
@@ -109,7 +113,7 @@ public class Check {
         playerData.addViolation(violation);
 
         PlayerCheatEvent playerCheatEvent = new PlayerCheatEvent(player, violation);
-        Bukkit.getPluginManager().callEvent(playerCheatEvent);
+        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().callEvent(playerCheatEvent));
         if (playerCheatEvent.isCancelled())
             return;
 
@@ -118,7 +122,7 @@ public class Check {
         for (Player staff : Bukkit.getOnlinePlayers()) {
             if (!staff.hasPermission("anticheat.alert"))
                 continue;
-            staff.sendMessage("§8[§6§lAC§8] §f" + player.getName() + " §7flagged " + checkName + " §c(x" + violations + ")" +
+            staff.sendMessage("§8[§6§lSG§8] §f" + player.getName() + " §7flagged " + checkName + " §c(x" + violations + ")" +
                     (message.isEmpty() ? "" : " §7[" + message + "]"));
         }
         if (violations >= checkInfo.maxVl() && checkInfo.ban() && !checkInfo.experimental() && !playerData.isBanned()) {
